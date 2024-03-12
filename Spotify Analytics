@@ -1,0 +1,85 @@
+# For this project, I downloaded Spotify data from Kaggle.
+# https://www.kaggle.com/datasets/equinxx/spotify-top-50-songs-in-2021
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+#Creating the table: 
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+#Then I inserted the Spotify Data .csv into the table.
+
+#Next, I explored the data using the following SQL. 
+
+--Getting familiar with the data and its columns. 
+SELECT *
+FROM BIT_DB.Spotifydata
+LIMIT 5;
+
+--Top 10 most popular songs
+SELECT     popularity,
+        track_name,
+        artist_name
+FROM BIT_DB.Spotifydata
+ORDER BY popularity desc
+LIMIT 10;
+
+--Most popular songs
+SELECT    popularity,
+        track_name,
+        artist_name
+FROM    BIT_DB.Spotifydata
+WHERE popularity >=92
+ORDER BY popularity;
+
+--Most popular artists
+SELECT  round(avg(popularity),2) as 'Average Popularity of Artist',
+        artist_name     
+FROM     BIT_DB.Spotifydata
+WHERE popularity>=90
+GROUP BY artist_name;
+
+--Which artists have the most popular songs
+SELECT count(track_name),
+        artist_name
+FROM BIT_DB.Spotifydata
+GROUP BY    artist_name;
+
+--Average duration and tempo of the most popular songs (in minutes)
+SELECT    AVG(duration_ms)/60000 as 'Average Duration in Minutes', --dividing the value to get minutes
+        AVG(tempo) as 'Average Tempo'
+FROM    BIT_DB.Spotifydata;
+
+--Danceability of songs in the list
+SELECT AVG(danceability) as 'Avg danceability',
+        MAX(danceability) as 'Most danceable song',
+        MIN(danceability) as 'Least danceable song'
+FROM BIT_DB.Spotifydata;
+
+--Classifying songs by danceability. What songs would be best suited for a party?
+SELECT artist_name, track_name, 
+CASE WHEN danceability>.7 THEN 'High danceability'
+WHEN danceability>.5 THEN 'Average danceability'
+ELSE 'Poor danceability' END "Danceability"
+FROM     BIT_DB.Spotifydata
+ORDER BY Danceability desc;
+
+
