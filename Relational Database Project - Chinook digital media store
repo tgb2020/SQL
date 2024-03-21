@@ -1,0 +1,118 @@
+##This project was created using a relational database for a digital media store called Chinook. 
+##This database includes tables for artists, albums, media tracks, invoices, and customers, among others.
+
+##Show customers who are not in the US
+SELECT FirstName, LastName, customerID, country
+FROM chinook.customers
+WHERE country<> "USA";
+
+##Show only customers from Brazil
+SELECT FirstName, LastName, customerID, country
+FROM chinook.customers
+WHERE country<> "USA"
+AND country="Brazil";
+
+##Find invoices for customers who are from Brazil
+SELECT FirstName, LastName, InvoiceId, InvoiceDate, Country 
+FROM chinook.invoices
+LEFT JOIN   chinook.customers
+ON invoices.CustomerID=customers.Customerid
+WHERE Country="Brazil";
+
+##Show Employees who are Sales Agents
+SELECT Employeeid, FirstName, LastName, Title
+FROM chinook.employees
+WHERE Title like "%Sales%Agent%";
+
+##Find a unique/distinct list of billing countries from the Invoice table
+SELECT distinct BillingCountry
+FROM chinook.invoices
+Order BY BillingCountry;
+
+##Provide a query that shows the invoices associated with each sales agent. 
+##Including Sales Agent's full name
+SELECT   FirstName, LastName, invoiceid
+FROM chinook.employees
+INNER JOIN chinook.customers
+ON employees.EmployeeId=customers.SupportRepid
+JOIN chinook.invoices
+ON invoices.Customerid=customers.customerid;
+
+##Show invoice total, customer name, country, and sales agent name for all invoices and customers
+SELECT InvoiceID, Total, customers.FirstName as customer_first, customers.LastName as customer_last, customers.Country
+    ,employees.FirstName as Sales_agent_first, employees.LastName as Sales_agent_last
+FROM invoices
+INNER JOIN customers
+ON invoices.Customerid=customers.Customerid
+JOIN employees
+On customers.SupportRepid=employees.Employeeid;
+
+
+##How invoives were there in 2009?
+SELECT count(invoiceid)
+FROM    invoices
+WHERE    InvoiceDate like "2009%";
+
+##What are the total sales for 2009?
+SELECT Round(SUM(total),2) as "Total revenue 2009"
+FROM    invoices
+WHERE InvoiceDate like "2009%";
+
+##A query that includes the purchased track name with each invoice line ID
+SELECT t.Name, i.InvoiceLineId
+FROM chinook.Invoice_items i
+JOIN chinook.Tracks t 
+ON i.TrackId = t.TrackId;
+
+##A query that includes the purchased track name and artist name with each invoice line id
+SELECT i.InvoiceLineID, t.Name as Track, ar.Name as Artist
+FROM    invoice_items i
+JOIN Tracks t
+ON i.Trackid=t.Trackid
+JOIN albums al
+ON t.albumid=al.albumid
+JOIN artists ar
+ON al.artistid=ar.artistid;
+
+##Query that shows all the Tracks, Album name, Media type, and Genre.
+SELECT i.InvoiceLineID, t.Name as Track, ar.Name as Artist, 
+    mt.Name as "Media Type", g.Name as Genre
+FROM    invoice_items i
+JOIN Tracks t
+ON i.Trackid=t.Trackid
+JOIN albums al
+ON t.albumid=al.albumid
+JOIN artists ar
+ON al.artistid=ar.artistid
+JOIN media_types as mt
+ON t.MediaTypeid=mt.MediaTypeid
+JOIN genres as g
+ON t.Genreid=g.Genreid;
+
+
+##Show the total sales made by each sales agent
+SELECT e.FirstName as "Agent Name", e.LastName as "Agent Last Name",
+        round(SUM(i.total),2) as "Total Sales" 
+FROM employees as e
+JOIN customers as c
+ON e.EmployeeId=c.SupportRepId
+JOIN invoices as i
+ON c.customerid=i.customerid
+GROUP BY c.SupportRepId;
+
+
+##Which sales agent made the most dollars in sales in 2009?
+SELECT e.FirstName as "Agent Name", e.LastName as "Agent Last Name",
+        round(SUM(i.total),2) as "Total Sales 2009" 
+FROM employees as e
+JOIN customers as c
+ON e.EmployeeId=c.SupportRepId
+JOIN invoices as i
+ON c.customerid=i.customerid
+WHERE i.InvoiceDate like "2009%"
+GROUP BY c.SupportRepId
+ORDER BY "Total Sales 2009" desc
+LIMIT 1;
+
+
+
